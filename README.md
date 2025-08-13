@@ -38,3 +38,69 @@ In the Linux kernel, the I2C subsystem is split into main layers:
 | `i2c_unregister_device(struct i2c_client *client)`                                   | Remove/unregister an I²C device.                             |
 
 6) Probe/Remove Hooks in I2C Client driver.
+
+
+7) Note
+a) kmalloc()
+
+b) kzalloc()
+
+- kzalloc() is a Linux kernel memory allocation function that works like kmalloc() but automatically zeroes out the memory it allocates.
+
+- Prototype :
+    Defined in include/linux/slab.h:
+    void *kzalloc(size_t size, gfp_t flags);
+
+with parameter :
++ size : Number of bytes to allocate.
++ flags	: GFP allocation flags (e.g., GFP_KERNEL, GFP_ATOMIC).
+
+- Behavior:
++ Allocates a block of memory from the kernel heap.
+
++ Initializes all bytes to 0 (memset() internally).
+
++ Returns a void pointer to the allocated memory.
+
++ Returns NULL if allocation fails.
+
++ Must be freed manually with kfree() when no longer needed 
+
+c) devm_kzalloc()
+- devm_kzalloc() is a device-managed memory allocation function in the Linux kernel.
+
+- It’s just like kzalloc(), but with automatic cleanup when the device is detached or the driver is removed.
+
+- Function prototype :
+    void *devm_kzalloc(struct device *dev, size_t size, gfp_t flags);
+with parameter:
+
++ dev : Pointer to the device’s struct device (often &client->dev in I²C drivers).
+
++ size : Number of bytes to allocate.
+
++ flag : Memory allocation flags (e.g., GFP_KERNEL, GFP_ATOMIC).
+
+- Behavior:
+
++ Allocates zero-initialized memory (like kzalloc()).
+
++ Memory is automatically freed when the device is detached or driver is unbound — no need to call kfree() manually.
+
++ Managed by the Device Resource Management (devres) framework.
+
+- Use devm_kzalloc() when:
+
++ The memory is tied to a device’s lifetime.
+
++ You don’t want to manually manage freeing it in remove().
+
+- Use kzalloc() when:
+
++ The memory isn’t strictly tied to a struct device.
+
++ You need manual control over the free timing.
+
+
+
+
